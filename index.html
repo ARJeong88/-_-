@@ -14,7 +14,9 @@
       background-color: #050608;
       color: #e2e8f0;
       user-select: none;
-      touch-action: manipulation;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
       overflow-x: hidden;
     }
 
@@ -60,6 +62,56 @@
     ::-webkit-scrollbar-thumb {
       background: #7f1d1d;
       border-radius: 4px;
+    }
+
+    /* 태블릿용 아날로그 조이스틱 스타일 */
+    #joystickZone {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 140px;
+      height: 140px;
+      z-index: 40;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+    }
+    #joystickBase {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(50, 50, 65, 0.55) 0%, rgba(15, 17, 24, 0.85) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 16px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0,0,0,0.5);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    #joystickStick {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ef4444 0%, #7f1d1d 100%);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+      position: absolute;
+      pointer-events: none;
+      transform: translate(0px, 0px);
+      transition: transform 0.04s ease-out;
+    }
+    .joystick-label {
+      position: absolute;
+      bottom: -18px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.45);
+      pointer-events: none;
+      width: 100%;
+      text-align: center;
+      letter-spacing: -0.02em;
     }
   </style>
 </head>
@@ -136,33 +188,19 @@
     <button id="flashlightBtn" title="손전등 밝기 조절" class="absolute top-3 right-3 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 text-yellow-400 w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-md z-10 transition">
       <i class="fas fa-flashlight"></i>
     </button>
-  </main>
 
-  <!-- Mobile Touch Controls (D-Pad) -->
-  <div class="w-full max-w-4xl mt-2 grid grid-cols-3 gap-2 sm:hidden select-none">
-    <div class="flex items-center justify-center">
-      <button id="dpad-left" class="w-14 h-14 bg-zinc-900 active:bg-red-900 border border-zinc-700 rounded-xl text-xl flex items-center justify-center text-zinc-300 shadow">
-        <i class="fas fa-arrow-left"></i>
-      </button>
+    <!-- 태블릿 왼손 엄지용 원형 아날로그 조이스틱 -->
+    <div id="joystickZone">
+      <div id="joystickBase">
+        <div id="joystickStick"></div>
+      </div>
+      <div class="joystick-label">왼손 엄지 조작</div>
     </div>
-    <div class="flex flex-col items-center justify-center gap-2">
-      <button id="dpad-up" class="w-14 h-14 bg-zinc-900 active:bg-red-900 border border-zinc-700 rounded-xl text-xl flex items-center justify-center text-zinc-300 shadow">
-        <i class="fas fa-arrow-up"></i>
-      </button>
-      <button id="dpad-down" class="w-14 h-14 bg-zinc-900 active:bg-red-900 border border-zinc-700 rounded-xl text-xl flex items-center justify-center text-zinc-300 shadow">
-        <i class="fas fa-arrow-down"></i>
-      </button>
-    </div>
-    <div class="flex items-center justify-center">
-      <button id="dpad-right" class="w-14 h-14 bg-zinc-900 active:bg-red-900 border border-zinc-700 rounded-xl text-xl flex items-center justify-center text-zinc-300 shadow">
-        <i class="fas fa-arrow-right"></i>
-      </button>
-    </div>
-  </div>
+  </main>
 
   <!-- Desktop Keyboard Instructions Footer -->
   <footer class="w-full max-w-4xl mt-2 text-center text-xs text-zinc-500 py-1 hidden sm:block">
-    조작키: <span class="text-zinc-300 font-mono bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">W, A, S, D</span> 또는 <span class="text-zinc-300 font-mono bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">방향키</span> &nbsp;|&nbsp; 
+    조작키: <span class="text-zinc-300 font-mono bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">W, A, S, D</span> 또는 <span class="text-zinc-300 font-mono bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">방향키</span> (태블릿은 좌측 하단 원을 엄지로 조작) &nbsp;|&nbsp; 
     문(출구)에 도달하면 과학 퀴즈가 출제됩니다. 정답을 맞혀 다음 구역으로 탈출하세요!
   </footer>
 
@@ -328,9 +366,8 @@
           this.droneGain = this.ctx.createGain();
           
           this.droneOsc.type = 'sawtooth';
-          this.droneOsc.frequency.setValueAtTime(55, this.ctx.currentTime); // Low A
+          this.droneOsc.frequency.setValueAtTime(55, this.ctx.currentTime);
 
-          // Low pass filter to make it a muffled dark rumble
           const filter = this.ctx.createBiquadFilter();
           filter.type = 'lowpass';
           filter.frequency.setValueAtTime(140, this.ctx.currentTime);
@@ -354,7 +391,6 @@
         return this.muted;
       }
 
-      // Hit / death thud
       playHit() {
         if (this.muted || !this.ctx) return;
         try {
@@ -372,7 +408,6 @@
         } catch(e) {}
       }
 
-      // Debuff / Trap zap sound
       playTrap() {
         if (this.muted || !this.ctx) return;
         try {
@@ -390,7 +425,6 @@
         } catch(e) {}
       }
 
-      // Footstep gentle noise
       playStep() {
         if (this.muted || !this.ctx) return;
         try {
@@ -407,7 +441,6 @@
         } catch(e) {}
       }
 
-      // Quiz door unlock success
       playSuccess() {
         if (this.muted || !this.ctx) return;
         try {
@@ -427,7 +460,6 @@
         } catch(e) {}
       }
 
-      // Wrong answer buzzer
       playBuzz() {
         if (this.muted || !this.ctx) return;
         try {
@@ -445,7 +477,6 @@
         } catch(e) {}
       }
 
-      // Fanfare chime when obtaining special item
       playItemGet() {
         if (this.muted || !this.ctx) return;
         try {
@@ -469,7 +500,7 @@
     const sound = new SoundEngine();
 
     /* =======================================================================
-       2. STAGE DATA (10 Stages strictly matching user specification)
+       2. STAGE DATA
        ======================================================================= */
     const STAGES = [
       {
@@ -590,7 +621,6 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Virtual resolution (fixed coordinate space scaled to canvas width/height)
     const V_WIDTH = 960;
     const V_HEIGHT = 600;
 
@@ -598,8 +628,8 @@
     let deathCount = 0;
     let startTime = Date.now();
     let gameActive = true;
-    let hasSuperFlashlight = false; // Granted upon clearing Stage 3
-    let flashlightRadius = 145; // Flashlight radius
+    let hasSuperFlashlight = false;
+    let flashlightRadius = 145;
     let isFlashlightExpanded = false;
 
     // Player Object
@@ -611,7 +641,6 @@
       color: '#38bdf8',
       facingAngle: 0,
       
-      // Debuff states
       slowTimer: 0,
       freezeTimer: 0,
       lrInvertTimer: 0,
@@ -630,15 +659,12 @@
       height: 90
     };
 
-    // Obstacle lists
     let dynamicObstacles = [];
-    let staticObstacles = []; // Puddles, webs, laser origins, banana peels
+    let staticObstacles = [];
     let extraSpawnedBooks = [];
-
-    // Screen Shake effect
     let screenShake = 0;
 
-    // Input tracker
+    // 키보드 및 태블릿 조이스틱 입력 상태
     const keys = {
       ArrowUp: false,
       ArrowDown: false,
@@ -649,8 +675,8 @@
       a: false,
       d: false
     };
+    const joystickVector = { x: 0, y: 0 };
 
-    /* Resize & scale canvas buffer correctly */
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
@@ -660,7 +686,6 @@
     }
     window.addEventListener('resize', resizeCanvas);
 
-    /* Stage Initialization */
     function initStage(stageIdx) {
       currentStageIndex = stageIdx;
       player.x = 70;
@@ -681,12 +706,8 @@
       document.getElementById('stageBadge').textContent = `STAGE ${stageInfo.id} / 10`;
       document.getElementById('stageName').textContent = `${stageInfo.id}단계 : ${stageInfo.name}`;
 
-      const cx = V_WIDTH / 2;
-      const cy = V_HEIGHT / 2;
-
-      // Construct obstacles matching each stage
       switch (stageInfo.id) {
-        case 1: // 교문: 들쥐 5마리
+        case 1:
           for (let i = 0; i < 5; i++) {
             dynamicObstacles.push({
               type: 'rat',
@@ -700,7 +721,7 @@
           }
           break;
 
-        case 2: // 1층 현관: 불량배 7명
+        case 2:
           for (let i = 0; i < 7; i++) {
             dynamicObstacles.push({
               type: 'delinquent',
@@ -714,7 +735,7 @@
           }
           break;
 
-        case 3: // 1층 계단: 바퀴벌레 5마리 + 검은 얼룩 5개
+        case 3:
           for (let i = 0; i < 5; i++) {
             dynamicObstacles.push({
               type: 'cockroach',
@@ -734,7 +755,7 @@
           }
           break;
 
-        case 4: // 2층 복도: 거미 5마리 (지그재그) + 거미줄 4개 (닿으면 2초간 정지)
+        case 4:
           for (let i = 0; i < 5; i++) {
             dynamicObstacles.push({
               type: 'spider',
@@ -759,7 +780,7 @@
           }
           break;
 
-        case 5: // 교무실: 좀비 5마리(불규칙) + 모기 3마리(물리면 5초 좌우 반전)
+        case 5:
           for (let i = 0; i < 5; i++) {
             dynamicObstacles.push({
               type: 'zombie',
@@ -786,7 +807,7 @@
           }
           break;
 
-        case 6: // 화장실: 화장지 귀신 5마리(지그재그) + 똥파리 3마리(닿으면 5초 상하좌우 반전)
+        case 6:
           for (let i = 0; i < 5; i++) {
             dynamicObstacles.push({
               type: 'toilet_ghost',
@@ -812,7 +833,7 @@
           }
           break;
 
-        case 7: // 체육관: 축구공 5개(불규칙) + 농구공 3개(맞으면 6단계로 강제 강등!)
+        case 7:
           for (let i = 0; i < 5; i++) {
             dynamicObstacles.push({
               type: 'soccer_ball',
@@ -838,7 +859,7 @@
           }
           break;
 
-        case 8: // 도서관: 책장에서 쏟아지는 책 5권(대각선 이동) + 책벌레 5마리(추적, 닿으면 기본 장애물 추가)
+        case 8:
           for (let i = 0; i < 5; i++) {
             dynamicObstacles.push({
               type: 'flying_book',
@@ -864,7 +885,7 @@
           }
           break;
 
-        case 9: // 급식실: 숟가락 3개, 젓가락 3개, 식판 3개(불규칙) + 바나나껍질 4개(미끄러짐)
+        case 9:
           const items = ['spoon', 'chopsticks', 'tray'];
           items.forEach((itemType, gIdx) => {
             for (let i = 0; i < 3; i++) {
@@ -891,7 +912,7 @@
           }
           break;
 
-        case 10: // 과학실: 구르는 전구 5개 + 해골 5개 (구역 추적, 닿으면 5초 감속) + 적외선 레이저 5군데 (2초 정지)
+        case 10:
           for (let i = 0; i < 5; i++) {
             dynamicObstacles.push({
               type: 'lightbulb',
@@ -917,14 +938,13 @@
               effect: 'slow_5s'
             });
           }
-          // 5 Pulsing infrared lasers
           for (let i = 0; i < 5; i++) {
             staticObstacles.push({
               type: 'laser',
               x: 220 + i * 125,
               y1: 60,
               y2: V_HEIGHT - 60,
-              activeTimer: i * 35, // phase offset
+              activeTimer: i * 35,
               period: 140,
               durationActive: 75,
               width: 8
@@ -934,7 +954,6 @@
       }
     }
 
-    /* Spawn an extra book when bookworm touches player */
     function spawnExtraBook() {
       dynamicObstacles.push({
         type: 'flying_book',
@@ -948,7 +967,6 @@
       showNotification("책벌레가 책을 쏟아냈습니다! (+장애물 1개)");
     }
 
-    /* Flash notification banner */
     let noticeTimeout = null;
     function showNotification(msg, isRed = true) {
       const banner = document.getElementById('flashNotice');
@@ -965,7 +983,6 @@
       }, 2000);
     }
 
-    /* Player hit / reset current stage */
     function resetPlayerPosition(reason = "장애물과 충돌했습니다!") {
       sound.playHit();
       deathCount++;
@@ -973,7 +990,6 @@
       screenShake = 16;
       showNotification(reason);
 
-      // Return player to start position of stage
       player.x = 70;
       player.y = V_HEIGHT / 2;
       player.slideTimer = 0;
@@ -983,17 +999,16 @@
       player.allInvertTimer = 0;
     }
 
-    /* Demote to Stage 6 (Triggered by Basketball in Stage 7) */
     function demoteToStage6() {
       sound.playHit();
       screenShake = 22;
       showNotification("농구공에 맞아 6단계(화장실)로 밀려났습니다!", true);
-      initStage(5); // Index 5 is Stage 6
+      initStage(5);
     }
 
-    /* Keyboard listener setup */
+    /* 키보드 입력 핸들러 */
     window.addEventListener('keydown', (e) => {
-      sound.init(); // User gesture audio unlock
+      sound.init();
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
         e.preventDefault();
       }
@@ -1008,33 +1023,91 @@
       }
     });
 
-    /* Touch buttons (D-Pad) handlers */
-    function bindTouchButton(elemId, key1, key2) {
-      const btn = document.getElementById(elemId);
-      if (!btn) return;
-      const activate = (e) => {
-        e.preventDefault();
-        sound.init();
-        keys[key1] = true;
-        if (key2) keys[key2] = true;
-      };
-      const deactivate = (e) => {
-        e.preventDefault();
-        keys[key1] = false;
-        if (key2) keys[key2] = false;
-      };
-      btn.addEventListener('touchstart', activate, { passive: false });
-      btn.addEventListener('touchend', deactivate, { passive: false });
-      btn.addEventListener('touchcancel', deactivate, { passive: false });
-      btn.addEventListener('mousedown', activate);
-      btn.addEventListener('mouseup', deactivate);
-      btn.addEventListener('mouseleave', deactivate);
-    }
+    /* =======================================================================
+       태블릿 왼손 엄지 전용 아날로그 조이스틱 로직
+       ======================================================================= */
+    function initTouchJoystick() {
+      const zone = document.getElementById('joystickZone');
+      const stick = document.getElementById('joystickStick');
+      const base = document.getElementById('joystickBase');
+      const maxRadius = 45;
+      let activeTouchId = null;
 
-    bindTouchButton('dpad-up', 'ArrowUp', 'w');
-    bindTouchButton('dpad-down', 'ArrowDown', 's');
-    bindTouchButton('dpad-left', 'ArrowLeft', 'a');
-    bindTouchButton('dpad-right', 'ArrowRight', 'd');
+      const handleMove = (clientX, clientY) => {
+        const rect = base.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        let dx = clientX - centerX;
+        let dy = clientY - centerY;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > maxRadius) {
+          dx = (dx / dist) * maxRadius;
+          dy = (dy / dist) * maxRadius;
+        }
+
+        stick.style.transform = `translate(${dx}px, ${dy}px)`;
+        joystickVector.x = dx / maxRadius;
+        joystickVector.y = dy / maxRadius;
+      };
+
+      const handleEnd = () => {
+        activeTouchId = null;
+        stick.style.transform = 'translate(0px, 0px)';
+        joystickVector.x = 0;
+        joystickVector.y = 0;
+      };
+
+      zone.addEventListener('touchstart', (e) => {
+        sound.init();
+        if (activeTouchId === null) {
+          const touch = e.changedTouches[0];
+          activeTouchId = touch.identifier;
+          handleMove(touch.clientX, touch.clientY);
+        }
+        e.preventDefault();
+      }, { passive: false });
+
+      window.addEventListener('touchmove', (e) => {
+        if (activeTouchId !== null) {
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === activeTouchId) {
+              handleMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+              break;
+            }
+          }
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', (e) => {
+        if (activeTouchId !== null) {
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === activeTouchId) {
+              handleEnd();
+              break;
+            }
+          }
+        }
+      });
+      window.addEventListener('touchcancel', handleEnd);
+
+      // 마우스 드래그 (PC 테스트용)
+      let isMouseDown = false;
+      zone.addEventListener('mousedown', (e) => {
+        sound.init();
+        isMouseDown = true;
+        handleMove(e.clientX, e.clientY);
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (isMouseDown) handleMove(e.clientX, e.clientY);
+      });
+      window.addEventListener('mouseup', () => {
+        if (isMouseDown) {
+          isMouseDown = false;
+          handleEnd();
+        }
+      });
+    }
 
     /* Flashlight Toggle */
     document.getElementById('flashlightBtn').addEventListener('click', () => {
@@ -1097,17 +1170,15 @@
 
     /* Check Player Movement & Collision */
     function updatePlayer() {
-      // Manage debuff counters
       if (player.freezeTimer > 0) {
         player.freezeTimer--;
-        return; // Unable to move
+        return;
       }
 
       if (player.slideTimer > 0) {
         player.slideTimer--;
         player.x += player.slideVx;
         player.y += player.slideVy;
-        // Keep inside bounds
         player.x = Math.max(25, Math.min(V_WIDTH - 25, player.x));
         player.y = Math.max(25, Math.min(V_HEIGHT - 25, player.y));
         return;
@@ -1117,10 +1188,16 @@
       if (player.lrInvertTimer > 0) player.lrInvertTimer--;
       if (player.allInvertTimer > 0) player.allInvertTimer--;
 
-      // Calculate directional input
       let moveX = 0;
       let moveY = 0;
 
+      // 1. 태블릿 아날로그 조이스틱 입력
+      if (Math.abs(joystickVector.x) > 0.05 || Math.abs(joystickVector.y) > 0.05) {
+        moveX = joystickVector.x;
+        moveY = joystickVector.y;
+      }
+
+      // 2. 키보드 입력
       const up = keys.ArrowUp || keys.w;
       const down = keys.ArrowDown || keys.s;
       const left = keys.ArrowLeft || keys.a;
@@ -1131,7 +1208,14 @@
       if (left) moveX -= 1;
       if (right) moveX += 1;
 
-      // Handle Directional Inversions
+      // 벡터 정규화
+      const len = Math.hypot(moveX, moveY);
+      if (len > 1) {
+        moveX /= len;
+        moveY /= len;
+      }
+
+      // 조작 반전 처리
       if (player.allInvertTimer > 0) {
         moveX = -moveX;
         moveY = -moveY;
@@ -1139,17 +1223,12 @@
         moveX = -moveX;
       }
 
-      // Compute speed
       let speed = player.baseSpeed;
       if (player.slowTimer > 0) {
-        speed *= 0.45; // 55% reduction
+        speed *= 0.45;
       }
 
-      if (moveX !== 0 && moveY !== 0) {
-        speed *= 0.7071; // Normalize diagonal
-      }
-
-      if (moveX !== 0 || moveY !== 0) {
+      if (Math.abs(moveX) > 0.05 || Math.abs(moveY) > 0.05) {
         player.x += moveX * speed;
         player.y += moveY * speed;
         player.facingAngle = Math.atan2(moveY, moveX);
@@ -1161,12 +1240,10 @@
         }
       }
 
-      // Boundary clamp
       const margin = player.radius + 10;
       player.x = Math.max(margin, Math.min(V_WIDTH - margin, player.x));
       player.y = Math.max(margin, Math.min(V_HEIGHT - margin, player.y));
 
-      // Check reaching exit door
       if (
         player.x + player.radius > exitDoor.x &&
         player.x - player.radius < exitDoor.x + exitDoor.width &&
@@ -1177,13 +1254,10 @@
       }
     }
 
-    /* Update dynamic & static obstacles */
     function updateObstacles() {
-      // Dynamic obstacles
       for (let i = 0; i < dynamicObstacles.length; i++) {
         const obs = dynamicObstacles[i];
 
-        // Specific movement behaviors
         if (obs.type === 'rat') {
           obs.y += obs.vy;
           if (obs.y < 70 || obs.y > V_HEIGHT - 70) obs.vy = -obs.vy;
@@ -1256,7 +1330,6 @@
           if (obs.x < 110 || obs.x > V_WIDTH - 110) obs.vx = -obs.vx;
           if (obs.y < 60 || obs.y > V_HEIGHT - 60) obs.vy = -obs.vy;
         } else if (obs.type === 'skeleton') {
-          // Skeleton tracks player only when inside assigned zoneX
           if (player.x >= obs.zoneX - 30 && player.x <= obs.zoneX + obs.zoneWidth + 30) {
             const dy = player.y - obs.y;
             const dist = Math.abs(dy);
@@ -1266,7 +1339,6 @@
           }
         }
 
-        // Collision Check with Player
         const pDist = Math.hypot(player.x - obs.x, player.y - obs.y);
         if (pDist < player.radius + obs.radius) {
           if (obs.harmful) {
@@ -1278,20 +1350,18 @@
         }
       }
 
-      // Static Obstacles checks
       for (let s of staticObstacles) {
         if (s.type === 'laser') {
           s.activeTimer = (s.activeTimer + 1) % s.period;
           const isFiring = s.activeTimer < s.durationActive;
           if (isFiring) {
-            // Check vertical laser beam collision
             if (
               Math.abs(player.x - s.x) < player.radius + s.width / 2 &&
               player.y >= s.y1 && player.y <= s.y2
             ) {
               if (player.freezeTimer === 0) {
                 sound.playTrap();
-                player.freezeTimer = 120; // 2 seconds (60fps)
+                player.freezeTimer = 120;
                 showNotification("적외선 레이저에 감전되어 2초간 정지!");
               }
             }
@@ -1302,20 +1372,20 @@
             if (s.type === 'black_puddle') {
               if (player.slowTimer === 0) {
                 sound.playTrap();
-                player.slowTimer = 300; // 5 seconds
+                player.slowTimer = 300;
                 showNotification("검은 얼룩을 밟아 5초간 이동 속도 저하!");
               }
             } else if (s.type === 'web') {
               if (player.freezeTimer === 0) {
                 sound.playTrap();
-                player.freezeTimer = 120; // 2 seconds
+                player.freezeTimer = 120;
                 showNotification("거미줄에 걸려 2초간 움직일 수 없습니다!");
               }
             } else if (s.type === 'banana') {
               if (player.slideTimer === 0) {
                 sound.playTrap();
-                player.slideTimer = 40; // ~0.66s slide
-                player.slideVx = -5.5; // violently slide back towards start
+                player.slideTimer = 40;
+                player.slideVx = -5.5;
                 player.slideVy = (Math.random() - 0.5) * 3;
                 showNotification("바나나 껍질에 미끄러져 뒤로 밀려납니다!");
               }
@@ -1325,24 +1395,22 @@
       }
     }
 
-    /* Apply specific non-lethal debuff */
     function applyDebuff(obs) {
       if (obs.effect === 'invert_lr') {
         if (player.lrInvertTimer === 0) {
           sound.playTrap();
-          player.lrInvertTimer = 300; // 5 sec
+          player.lrInvertTimer = 300;
           showNotification("모기에 물려 5초간 좌우 조작이 반전됩니다!");
         }
       } else if (obs.effect === 'invert_all') {
         if (player.allInvertTimer === 0) {
           sound.playTrap();
-          player.allInvertTimer = 300; // 5 sec
+          player.allInvertTimer = 300;
           showNotification("똥파리와 부딪혀 5초간 모든 방향키가 반전됩니다!");
         }
       } else if (obs.effect === 'demote_stage_6') {
         demoteToStage6();
       } else if (obs.effect === 'spawn_book') {
-        // Cooldown between book spawns
         if (!obs.lastHit || Date.now() - obs.lastHit > 1500) {
           obs.lastHit = Date.now();
           sound.playTrap();
@@ -1351,7 +1419,7 @@
       } else if (obs.effect === 'slow_5s') {
         if (player.slowTimer === 0) {
           sound.playTrap();
-          player.slowTimer = 300; // 5 sec
+          player.slowTimer = 300;
           showNotification("해골의 오한으로 인해 5초간 이동 속도 저하!");
         }
       }
@@ -1361,13 +1429,11 @@
        4. RENDERING & VISUAL EFFECTS
        ======================================================================= */
     function draw() {
-      // Clear canvas
       ctx.save();
       const scaleX = canvas.width / V_WIDTH;
       const scaleY = canvas.height / V_HEIGHT;
       ctx.scale(scaleX, scaleY);
 
-      // Handle Screen Shake
       if (screenShake > 0) {
         const sx = (Math.random() - 0.5) * screenShake;
         const sy = (Math.random() - 0.5) * screenShake;
@@ -1376,34 +1442,20 @@
         if (screenShake < 0.5) screenShake = 0;
       }
 
-      // Background room environment
       drawEnvironment();
-
-      // Static Traps (Puddles, Webs, Lasers, Banana)
       drawStaticObstacles();
-
-      // Exit Door
       drawExitDoor();
-
-      // Dynamic Obstacles
       drawDynamicObstacles();
-
-      // Player
       drawPlayer();
-
-      // Spooky Fog & Flashlight Vignette Mask
       drawFlashlightLighting();
 
       ctx.restore();
     }
 
-    /* Classroom & Hallway Background Tile Graphics */
     function drawEnvironment() {
-      // Base floor color
       ctx.fillStyle = '#0f1117';
       ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
-      // School floor grid tiles
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
       ctx.lineWidth = 1;
       const gridSize = 48;
@@ -1420,19 +1472,16 @@
         ctx.stroke();
       }
 
-      // Borders / Walls
       ctx.fillStyle = '#1c1917';
-      ctx.fillRect(0, 0, V_WIDTH, 20); // Top wall
-      ctx.fillRect(0, V_HEIGHT - 20, V_WIDTH, 20); // Bottom wall
-      ctx.fillRect(0, 0, 20, V_HEIGHT); // Left wall
-      ctx.fillRect(V_WIDTH - 20, 0, 20, V_HEIGHT); // Right wall
+      ctx.fillRect(0, 0, V_WIDTH, 20);
+      ctx.fillRect(0, V_HEIGHT - 20, V_WIDTH, 20);
+      ctx.fillRect(0, 0, 20, V_HEIGHT);
+      ctx.fillRect(V_WIDTH - 20, 0, 20, V_HEIGHT);
 
-      // Wall hazard lines
       ctx.strokeStyle = '#450a0a';
       ctx.lineWidth = 3;
       ctx.strokeRect(20, 20, V_WIDTH - 40, V_HEIGHT - 40);
 
-      // Start area floor marker
       ctx.fillStyle = 'rgba(34, 197, 94, 0.1)';
       ctx.fillRect(20, V_HEIGHT / 2 - 50, 90, 100);
       ctx.strokeStyle = 'rgba(34, 197, 94, 0.3)';
@@ -1442,20 +1491,16 @@
       ctx.fillText('출발지', 45, V_HEIGHT / 2 + 4);
     }
 
-    /* Exit Door Drawing */
     function drawExitDoor() {
       const isExitLit = (Math.sin(Date.now() * 0.005) + 1) * 0.5;
 
       ctx.save();
-      // Door frame
       ctx.fillStyle = '#27272a';
       ctx.fillRect(exitDoor.x, exitDoor.y, exitDoor.width, exitDoor.height);
 
-      // Door panel
       ctx.fillStyle = '#7f1d1d';
       ctx.fillRect(exitDoor.x + 4, exitDoor.y + 4, exitDoor.width - 8, exitDoor.height - 8);
 
-      // Pulsing keyhole glow
       ctx.fillStyle = `rgba(239, 68, 68, ${0.4 + isExitLit * 0.5})`;
       ctx.shadowColor = '#ef4444';
       ctx.shadowBlur = 12 * isExitLit;
@@ -1463,7 +1508,6 @@
       ctx.arc(exitDoor.x + exitDoor.width / 2, exitDoor.y + exitDoor.height / 2, 8, 0, Math.PI * 2);
       ctx.fill();
 
-      // Door label
       ctx.shadowBlur = 0;
       ctx.fillStyle = '#fecaca';
       ctx.font = 'bold 11px sans-serif';
@@ -1471,7 +1515,6 @@
       ctx.restore();
     }
 
-    /* Static Traps Rendering */
     function drawStaticObstacles() {
       for (const s of staticObstacles) {
         if (s.type === 'black_puddle') {
@@ -1483,7 +1526,6 @@
           ctx.ellipse(s.x, s.y, s.radius * 1.2, s.radius * 0.8, 0.2, 0, Math.PI * 2);
           ctx.fill();
           ctx.stroke();
-          // Bubbles
           ctx.fillStyle = 'rgba(100, 50, 120, 0.4)';
           ctx.beginPath();
           ctx.arc(s.x - 6, s.y - 4, 3, 0, Math.PI * 2);
@@ -1523,13 +1565,11 @@
         } else if (s.type === 'laser') {
           const isFiring = s.activeTimer < s.durationActive;
           ctx.save();
-          // Emitter posts
           ctx.fillStyle = '#475569';
           ctx.fillRect(s.x - 6, s.y1 - 10, 12, 10);
           ctx.fillRect(s.x - 6, s.y2, 12, 10);
 
           if (isFiring) {
-            // Laser beam
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = s.width;
             ctx.shadowColor = '#f87171';
@@ -1539,13 +1579,11 @@
             ctx.lineTo(s.x, s.y2);
             ctx.stroke();
 
-            // Inner core
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
             ctx.shadowBlur = 4;
             ctx.stroke();
           } else {
-            // Warning guide line
             ctx.strokeStyle = 'rgba(239, 68, 68, 0.15)';
             ctx.setLineDash([4, 6]);
             ctx.beginPath();
@@ -1558,31 +1596,28 @@
       }
     }
 
-    /* Dynamic Obstacle Sprite / Shape Drawing */
     function drawDynamicObstacles() {
       for (const obs of dynamicObstacles) {
         ctx.save();
         ctx.translate(obs.x, obs.y);
 
         switch (obs.type) {
-          case 'rat': // 1단계 들쥐
+          case 'rat':
             ctx.fillStyle = '#71717a';
             ctx.beginPath();
             ctx.ellipse(0, 0, 14, 8, Math.atan2(obs.vy, obs.vx || 0.1), 0, Math.PI * 2);
             ctx.fill();
-            // Red eyes
             ctx.fillStyle = '#ef4444';
             ctx.beginPath();
             ctx.arc(6, -2, 2, 0, Math.PI * 2);
             ctx.fill();
             break;
 
-          case 'delinquent': // 2단계 불량배 원혼
+          case 'delinquent':
             ctx.fillStyle = 'rgba(153, 27, 27, 0.75)';
             ctx.beginPath();
             ctx.arc(0, -2, 14, 0, Math.PI * 2);
             ctx.fill();
-            // Angry mask features
             ctx.fillStyle = '#fecaca';
             ctx.fillRect(-6, -4, 4, 3);
             ctx.fillRect(2, -4, 4, 3);
@@ -1590,12 +1625,11 @@
             ctx.fillRect(-4, 4, 8, 2);
             break;
 
-          case 'cockroach': // 3단계 바퀴벌레
+          case 'cockroach':
             ctx.fillStyle = '#451a03';
             ctx.beginPath();
             ctx.ellipse(0, 0, 12, 6, Math.atan2(obs.vy, obs.vx), 0, Math.PI * 2);
             ctx.fill();
-            // Legs
             ctx.strokeStyle = '#78350f';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
@@ -1604,7 +1638,7 @@
             ctx.stroke();
             break;
 
-          case 'spider': // 4단계 거미
+          case 'spider':
             ctx.fillStyle = '#18181b';
             ctx.beginPath();
             ctx.arc(0, 0, 10, 0, Math.PI * 2);
@@ -1617,13 +1651,12 @@
               ctx.moveTo(10, -8 + i * 5); ctx.lineTo(17, -10 + i * 6);
               ctx.stroke();
             }
-            // Glow eye
             ctx.fillStyle = '#ef4444';
             ctx.fillRect(-3, -3, 2, 2);
             ctx.fillRect(1, -3, 2, 2);
             break;
 
-          case 'zombie': // 5단계 좀비
+          case 'zombie':
             ctx.fillStyle = '#065f46';
             ctx.beginPath();
             ctx.arc(0, 0, 14, 0, Math.PI * 2);
@@ -1635,12 +1668,11 @@
             ctx.fill();
             break;
 
-          case 'mosquito': // 5단계 모기
+          case 'mosquito':
             ctx.fillStyle = '#a1a1aa';
             ctx.beginPath();
             ctx.arc(0, 0, 5, 0, Math.PI * 2);
             ctx.fill();
-            // Thin wings
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
             ctx.beginPath();
             ctx.ellipse(-4, -6, 6, 2, 0.4, 0, Math.PI * 2);
@@ -1648,7 +1680,7 @@
             ctx.fill();
             break;
 
-          case 'toilet_ghost': // 6단계 화장지 귀신
+          case 'toilet_ghost':
             ctx.fillStyle = 'rgba(244, 244, 245, 0.85)';
             ctx.beginPath();
             ctx.arc(0, -4, 12, Math.PI, 0, false);
@@ -1659,7 +1691,6 @@
             ctx.lineTo(-12, 10);
             ctx.closePath();
             ctx.fill();
-            // Dark eye holes
             ctx.fillStyle = '#09090b';
             ctx.beginPath();
             ctx.arc(-4, -4, 2.5, 0, Math.PI * 2);
@@ -1667,7 +1698,7 @@
             ctx.fill();
             break;
 
-          case 'fly': // 6단계 똥파리
+          case 'fly':
             ctx.fillStyle = '#1c1917';
             ctx.beginPath();
             ctx.arc(0, 0, 6, 0, Math.PI * 2);
@@ -1679,7 +1710,7 @@
             ctx.fill();
             break;
 
-          case 'soccer_ball': // 7단계 축구공
+          case 'soccer_ball':
             ctx.fillStyle = '#f8fafc';
             ctx.beginPath();
             ctx.arc(0, 0, 14, 0, Math.PI * 2);
@@ -1693,7 +1724,7 @@
             ctx.stroke();
             break;
 
-          case 'basketball': // 7단계 농구공 (강등 위험)
+          case 'basketball':
             ctx.fillStyle = '#ea580c';
             ctx.beginPath();
             ctx.arc(0, 0, 16, 0, Math.PI * 2);
@@ -1704,20 +1735,19 @@
             ctx.moveTo(-16, 0); ctx.lineTo(16, 0);
             ctx.moveTo(0, -16); ctx.lineTo(0, 16);
             ctx.stroke();
-            // Danger aura
             ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
             ctx.lineWidth = 2;
             ctx.strokeRect(-18, -18, 36, 36);
             break;
 
-          case 'flying_book': // 8단계 날아다니는 책
+          case 'flying_book':
             ctx.fillStyle = '#b91c1c';
             ctx.fillRect(-12, -8, 24, 16);
             ctx.fillStyle = '#fef08a';
             ctx.fillRect(-10, -6, 20, 12);
             break;
 
-          case 'bookworm': // 8단계 책벌레
+          case 'bookworm':
             ctx.fillStyle = '#65a30d';
             for (let b = 0; b < 3; b++) {
               ctx.beginPath();
@@ -1728,7 +1758,7 @@
             ctx.fillRect(4, -2, 2, 2);
             break;
 
-          case 'spoon': // 9단계 숟가락
+          case 'spoon':
             if (obs.rotation) ctx.rotate(obs.rotation);
             ctx.fillStyle = '#94a3b8';
             ctx.fillRect(-2, -12, 4, 18);
@@ -1737,7 +1767,7 @@
             ctx.fill();
             break;
 
-          case 'chopsticks': // 9단계 젓가락
+          case 'chopsticks':
             if (obs.rotation) ctx.rotate(obs.rotation);
             ctx.strokeStyle = '#cbd5e1';
             ctx.lineWidth = 2;
@@ -1747,7 +1777,7 @@
             ctx.stroke();
             break;
 
-          case 'tray': // 9단계 식판
+          case 'tray':
             if (obs.rotation) ctx.rotate(obs.rotation);
             ctx.fillStyle = '#64748b';
             ctx.strokeStyle = '#94a3b8';
@@ -1756,7 +1786,7 @@
             ctx.strokeRect(-14, -10, 28, 20);
             break;
 
-          case 'lightbulb': // 10단계 구르는 전구
+          case 'lightbulb':
             ctx.fillStyle = '#fef08a';
             ctx.shadowColor = '#facc15';
             ctx.shadowBlur = 8;
@@ -1768,13 +1798,12 @@
             ctx.fillRect(-4, 7, 8, 5);
             break;
 
-          case 'skeleton': // 10단계 해골
+          case 'skeleton':
             ctx.fillStyle = '#f1f5f9';
             ctx.beginPath();
             ctx.arc(0, -2, 11, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillRect(-6, 7, 12, 6);
-            // Black eye sockets
             ctx.fillStyle = '#0f172a';
             ctx.beginPath();
             ctx.arc(-4, -2, 3, 0, Math.PI * 2);
@@ -1787,19 +1816,16 @@
       }
     }
 
-    /* Player Rendering */
     function drawPlayer() {
       ctx.save();
       ctx.translate(player.x, player.y);
 
-      // Tangled web overlay if frozen
       if (player.freezeTimer > 0) {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.lineWidth = 2;
         ctx.strokeRect(-18, -18, 36, 36);
       }
 
-      // Player Body
       ctx.fillStyle = player.color;
       ctx.shadowColor = '#0284c7';
       ctx.shadowBlur = 8;
@@ -1808,21 +1834,18 @@
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Flashlight fixture in hands
       ctx.save();
       ctx.rotate(player.facingAngle);
       ctx.fillStyle = '#fde047';
       ctx.fillRect(player.radius - 2, -3, 8, 6);
       ctx.restore();
 
-      // Eye dots
       ctx.fillStyle = '#0f172a';
       ctx.beginPath();
       ctx.arc(Math.cos(player.facingAngle) * 5 - 2, Math.sin(player.facingAngle) * 5 - 2, 2, 0, Math.PI * 2);
       ctx.arc(Math.cos(player.facingAngle) * 5 + 2, Math.sin(player.facingAngle) * 5 + 2, 2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Debuff icon atop head
       if (player.allInvertTimer > 0 || player.lrInvertTimer > 0) {
         ctx.fillStyle = '#f59e0b';
         ctx.font = 'bold 13px sans-serif';
@@ -1836,12 +1859,9 @@
       ctx.restore();
     }
 
-    /* Spooky Darkness Fog & Flashlight Vignette */
     function drawFlashlightLighting() {
-      // Dynamic lighting radius based on upgraded flashlight
       const currentRadius = flashlightRadius;
 
-      // Create radial gradient centered at player
       const grad = ctx.createRadialGradient(
         player.x, player.y, hasSuperFlashlight ? 40 : 25,
         player.x, player.y, currentRadius
@@ -1862,7 +1882,6 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
-      // Light beam cone ahead of player
       ctx.save();
       ctx.translate(player.x, player.y);
       ctx.rotate(player.facingAngle);
@@ -1885,7 +1904,7 @@
        ======================================================================= */
     function triggerQuizModal() {
       if (!gameActive) return;
-      gameActive = false; // Pause game loop interactions
+      gameActive = false;
       const stage = STAGES[currentStageIndex];
 
       document.getElementById('quizStageTitle').textContent = `${stage.id}단계 탈출 잠금장치`;
@@ -1920,14 +1939,11 @@
         sound.playSuccess();
         document.getElementById('quizModal').classList.add('hidden');
 
-        // Check if finished final stage 10
         if (currentStageIndex >= 9) {
           triggerGameVictory();
         } else if (currentStageIndex === 2) {
-          // Special event: Stage 3 clear triggers the Super Flashlight award modal
           triggerStage3ItemReward();
         } else {
-          // Advance to next stage
           showNotification(`${stage.nextDesc}`, false);
           initStage(currentStageIndex + 1);
           gameActive = true;
@@ -1940,11 +1956,10 @@
       }
     }
 
-    /* Stage 3 Special Reward Event */
     function triggerStage3ItemReward() {
       gameActive = false;
       hasSuperFlashlight = true;
-      flashlightRadius = 260; // Significantly enlarged illumination radius
+      flashlightRadius = 260;
       document.getElementById('itemBadge').classList.remove('hidden');
       document.getElementById('itemBadge').classList.add('flex');
       sound.playItemGet();
@@ -1954,11 +1969,10 @@
     function confirmItemReward() {
       document.getElementById('itemAcquiredModal').classList.add('hidden');
       showNotification("고성능 손전등을 켜고 2층 복도로 이동합니다!", false);
-      initStage(3); // Stage 4 (0-based index 3: 2층 복도)
+      initStage(3);
       gameActive = true;
     }
 
-    /* Game Clear / Victory Sequence */
     function triggerGameVictory() {
       gameActive = false;
       sound.playSuccess();
@@ -1972,7 +1986,6 @@
       document.getElementById('clearModal').classList.remove('hidden');
     }
 
-    /* Restart entire game */
     function restartEntireGame() {
       document.getElementById('clearModal').classList.add('hidden');
       deathCount = 0;
@@ -1987,7 +2000,6 @@
       gameActive = true;
     }
 
-    /* Timer formatting update */
     setInterval(() => {
       if (!gameActive) return;
       const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
@@ -2009,10 +2021,10 @@
       requestAnimationFrame(gameLoop);
     }
 
-    // Initialize first stage and start loop when DOM is ready
     window.onload = function () {
       resizeCanvas();
       initStage(0);
+      initTouchJoystick();
       requestAnimationFrame(gameLoop);
     };
   </script>
